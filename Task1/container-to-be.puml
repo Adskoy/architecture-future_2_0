@@ -4,6 +4,8 @@ top to bottom direction
 !includeurl https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
 skinparam linetype ortho
 
+Person_Ext(customer, "Пациент", "Пользователь системы")
+
 System_Boundary(b0, "Периметр `Будущее 2.0`") {
     Person(operator, "Мед. работник", "Работает во внутренней системе клиник")
     Person(fin_operator, "Сотрудник финтеха", "Работает в приобретенном банке")
@@ -14,6 +16,9 @@ System_Boundary(b0, "Периметр `Будущее 2.0`") {
     ContainerQueue(kafka, "Брокер сообщений", "Kafka", "Асинхронная обработка событий между сервисами") #crimson
 
     System_Boundary(producers, "Продьюсеры бигдаты") {
+        Container(user, "Пользовательский ЛК", "Golang/Java", "Регистрация и запись на прием")
+        ContainerDb(user_db, "БД юзеров", PostgreSQL"")
+        Rel(user, user_db, "", "")
         Container(finance, "Финтех", "Golang/Java", "Банк для обслуживание клиентов клиник")
         ContainerDb(finance_db, "База данных финтеха", "PostgreSQL", "Счета, транзакции, кредитные данные")
         Rel(finance, finance_db, "", "")
@@ -22,6 +27,7 @@ System_Boundary(b0, "Периметр `Будущее 2.0`") {
         Rel(inner, inner_db, "", "")
         Rel(finance, kafka, "")
         Rel(inner, kafka, "")
+        Rel(user, kafka, "")
     }
 
     System_Boundary(consumers, "Консьюмеры бигдаты") {
@@ -34,8 +40,6 @@ System_Boundary(b0, "Периметр `Будущее 2.0`") {
         ContainerQueue(etl, "Слой ETL/ELT", "")
         Container(catalog, "Data Catalog", "Nessie", "Управляет метаданными")
         Container(s3, "Data Lake", "Minio", "S3-совместимое хранилище равок") #crimson
-        Rel(finance_db, etl, "Предоставляет финансовые данные", "")
-        Rel(inner_db, etl, "Предоставляет медицинские данные", "")
         Rel(etl, s3, "Пишет данные", "")
         Rel(etl, catalog, "Пишет метаданные", "")
         Rel(kafka, etl, "Пишет данные", "")
@@ -48,12 +52,14 @@ System_Boundary(b0, "Периметр `Будущее 2.0`") {
 
     Rel(api, inner, "", "REST")
     Rel(api, finance, "", "REST")
+    Rel(api, user, "", "REST")
 
     Rel(operator, api, "Работает во внутренней системе", "")
     Rel(fin_operator, api, "Работает в системе банка", "")
     Rel(analyst, bi, "Строит кастомные отчеты", "")
     Rel(ai_spec, ai, "Работает с ML сервисами", "")
     Rel(stakeholder, portal, "Смотрит типовые отчеты", "")
+    Rel(customer, api, "Пользуется услугами", "")
 }
 
 
