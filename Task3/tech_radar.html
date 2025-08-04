@@ -1,0 +1,75 @@
+<html>
+<head>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script src="https://zalando.github.io/tech-radar/release/radar-0.12.js"></script>
+</head>
+<body>
+<svg id="radar"></svg>
+</body>
+
+<script>
+    radar_visualization({
+        repo_url: "https://github.com/zalando/tech-radar",
+        svg_id: "radar",
+        width: 1450,
+        height: 1000,
+        scale: 1.0,
+        colors: {
+            background: "#fff",
+            grid: "#bbb",
+            inactive: "#ddd"
+        },
+        // Some font families might lead to font size issues
+        // Arial, Helvetica, or Source Sans Pro seem to work well though
+        font_family: "Arial, Helvetica",
+        title: "SPRINT 11",
+        quadrants: [
+            { name: "Методы" },
+            { name: "Платформы" },
+            { name: "Языки и фреймворки" },
+            { name: "Инструменты" }
+        ],
+        rings: [
+            { name: "ADAPT",  color: "#5ba300" },
+            { name: "TRIAL", color: "#009eb0" },
+            { name: "ASSET",  color: "#c7ba00" },
+            { name: "HOLD",  color: "#e09b96" }
+        ],
+        print_layout: true,
+        links_in_new_tabs: true,
+        entries: [
+            { label: "Python", quadrant: 2, ring: 0 },
+            { label: "GoLang", quadrant: 2, ring: 0 },
+            { label: "Java", quadrant: 2, ring: 0 },
+            { label: "React", quadrant: 2, ring: 1, moved: 2 },
+
+
+            { label: "Power BI", quadrant: 3, ring: 0 },
+            { label: "Minio", quadrant: 3, ring: 1, moved: 2 },
+            { label: "Apache Kafka", quadrant: 3, ring: 1, moved: 2 },
+            { label: "PostgreSQL", quadrant: 3, ring: 1, moved: 2 },
+            { label: "Clickhouse", quadrant: 3, ring: 1, moved: 2 },
+            { label: "Nessie", quadrant: 3, ring: 1, moved: 2 },
+            { label: "SQL Server 2008", quadrant: 3, ring: 3, moved: -1 },
+            { label: "Power Builder", quadrant: 3, ring: 3, moved: -1 },
+            { label: "Apache Camel", quadrant: 3, ring: 3, moved: -1 },
+
+
+            { label: "Windows Server 2008", quadrant: 1, ring: 3, moved: -1 },
+            { label: "Ubuntu LTS", quadrant: 1, ring: 1, moved: 2 },
+            { label: "Android OS", quadrant: 1, ring: 1, moved: 2 },
+            { label: "iOS", quadrant: 1, ring: 1, moved: 2 },
+            { label: "Windows 11 Workstation", quadrant: 1, ring: 0 },
+
+
+            { label: "DWH", quadrant: 0, ring: 3, moved: -1 },
+            { label: "DLH", quadrant: 0, ring: 1, moved: 2 },
+            { label: "Монолиты", quadrant: 0, ring: 3, moved: -1 },
+            { label: "Микросервисная архитектура", quadrant: 0, ring: 0, moved: 1 },
+
+
+        ]
+    });
+
+</script>
+</html>
