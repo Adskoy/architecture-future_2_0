@@ -5,4 +5,7 @@
 [tech_radar.html](./tech_radar.html)
 ![](./tech_radar.png)
 
-Дорожная карта изменений представлена в [roadmap.drawio](./roadmap.drawio)
+Дорожная карта изменений:
+
+[roadmap.drawio](./roadmap.drawio):
+![](./roadmap.png)
