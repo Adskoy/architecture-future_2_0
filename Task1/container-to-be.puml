@@ -14,6 +14,7 @@ System_Boundary(b0, "Периметр `Будущее 2.0`") {
     Person(stakeholder, "Руководитель бизнеса", "Смотрит типовые отчеты")
     Container(api, "API-шлюз", "YARP")
     ContainerQueue(kafka, "Брокер сообщений", "Kafka", "Асинхронная обработка событий между сервисами") #crimson
+    ContainerDb(legacy, "Легаси DWH", "SQL Server 2008")
 
     System_Boundary(producers, "Продьюсеры бигдаты") {
         Container(user, "Пользовательский ЛК", "Golang/Java", "Регистрация и запись на прием")
@@ -37,7 +38,7 @@ System_Boundary(b0, "Периметр `Будущее 2.0`") {
         }
 
     System_Boundary(storage, "Data Mesh") {
-        ContainerQueue(etl, "Слой ETL/ELT", "")
+        ContainerQueue(etl, "Слой ETL/ELT", "Apache Airflow")
         Container(catalog, "Data Catalog", "Nessie", "Управляет метаданными")
         Container(s3, "Data Lake", "Minio", "S3-совместимое хранилище равок") #crimson
         Rel(etl, s3, "Пишет данные", "")
@@ -53,6 +54,8 @@ System_Boundary(b0, "Периметр `Будущее 2.0`") {
     Rel(api, inner, "", "REST")
     Rel(api, finance, "", "REST")
     Rel(api, user, "", "REST")
+
+    Rel(bi, legacy, "")
 
     Rel(operator, api, "Работает во внутренней системе", "")
     Rel(fin_operator, api, "Работает в системе банка", "")
