@@ -1,0 +1,75 @@
+@startuml
+title C4 Диаграмма контейнеров "Будущее 2.0"
+top to bottom direction
+!includeurl https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+skinparam linetype ortho
+
+Person_Ext(customer, "Пациент", "Пользователь системы")
+
+System_Boundary(b0, "Периметр `Будущее 2.0`") {
+    Person(operator, "Мед. работник", "Работает во внутренней системе клиник")
+    Person(fin_operator, "Сотрудник финтеха", "Работает в приобретенном банке")
+    Person(analyst, "Аналитик", "Занимается аналитикой, nuff said")
+    Person(ai_spec, "Специалист по ML", "Обучает модельки")
+    Person(stakeholder, "Руководитель бизнеса", "Смотрит типовые отчеты")
+    Container(api, "API-шлюз", "YARP")
+    ContainerQueue(kafka, "Брокер сообщений", "Kafka", "Асинхронная обработка событий между сервисами") #crimson
+    ContainerDb(legacy, "Легаси DWH", "SQL Server 2008")
+    Container(camel, "Адаптер Camel", "Apache Camel", "Интеграция с легаси DWH") #orange
+
+    System_Boundary(producers, "Продьюсеры бигдаты") {
+        Container(user, "Пользовательский ЛК", "Golang/Java", "Регистрация и запись на прием")
+        ContainerDb(user_db, "БД юзеров", PostgreSQL"")
+        Rel(user, user_db, "", "")
+        Container(finance, "Финтех", "Golang/Java", "Банк для обслуживание клиентов клиник")
+        ContainerDb(finance_db, "База данных финтеха", "PostgreSQL", "Счета, транзакции, кредитные данные")
+        Rel(finance, finance_db, "", "")
+        Container(inner, "Внутренние сервисы", "Java", "Сервисы для обслуживания пациентов в клиниках")
+        ContainerDb(inner_db, "База данных внутренних сервисов", "PostgreSQL", "Данные о пациентах, клиниках, операциях")
+        Rel(inner, inner_db, "", "")
+        Rel(finance, camel, "")
+        Rel(inner, kafka, "")
+        Rel(user, kafka, "")
+    }
+
+    System_Boundary(consumers, "Консьюмеры бигдаты") {
+            Container(ai, "ИИ-сервисы", "Python", "Обучалки на бигдате")
+            Container(bi, "BI-система", "PowerBI", "PBI не трогаем, он хорош") #ffca00
+            Container(portal, "Портал самообслуживания", "Typescript/React", "Построение аналитических отчётов")
+        }
+
+    System_Boundary(storage, "Data Mesh") {
+        ContainerQueue(etl, "Слой ETL/ELT", "Apache Airflow")
+        Container(catalog, "Data Catalog", "Nessie", "Управляет метаданными")
+        Container(table, "Табличное хранилище", "Apache Iceberg", "")
+        Container(s3, "Data Lake", "Minio", "S3-совместимое хранилище равок") #crimson
+        Rel(etl, table, "Пишет метаданные", "")
+        Rel(table, catalog, "Пишет метаданные", "")
+        Rel(table, s3, "Пишет таблицы", "")
+        Rel(etl, kafka, "Забирает данные в DAG", "python")
+        Rel(ai, kafka, "Слушает события")
+        Rel(portal, kafka, "Слушает события")
+        Rel(portal, catalog, "Читает бигдату")
+        Rel(ai, table, "Читает бигдату")
+        Rel(bi, table, "Читает бигдату")
+    }
+
+    Rel(api, inner, "", "REST")
+    Rel(api, finance, "", "REST")
+    Rel(api, user, "", "REST")
+
+    Rel(bi, legacy, "")
+    Rel(legacy, camel, "Интеграционные сообщения")
+    Rel(camel, kafka, "Пишет сообщения")
+    Rel(ai, camel, "")
+
+    Rel(operator, api, "Работает во внутренней системе", "")
+    Rel(fin_operator, api, "Работает в системе банка", "")
+    Rel(analyst, bi, "Строит кастомные отчеты", "")
+    Rel(ai_spec, ai, "Работает с ML сервисами", "")
+    Rel(stakeholder, portal, "Смотрит типовые отчеты", "")
+    Rel(customer, api, "Пользуется услугами", "")
+}
+
+
+@enduml
