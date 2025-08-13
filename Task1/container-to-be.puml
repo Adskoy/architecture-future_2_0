@@ -15,6 +15,7 @@ System_Boundary(b0, "Периметр `Будущее 2.0`") {
     Container(api, "API-шлюз", "YARP")
     ContainerQueue(kafka, "Брокер сообщений", "Kafka", "Асинхронная обработка событий между сервисами") #crimson
     ContainerDb(legacy, "Легаси DWH", "SQL Server 2008")
+    Container(camel, "Адаптер Camel", "Apache Camel", "Интеграция с легаси DWH") #orange
 
     System_Boundary(producers, "Продьюсеры бигдаты") {
         Container(user, "Пользовательский ЛК", "Golang/Java", "Регистрация и запись на прием")
@@ -26,7 +27,7 @@ System_Boundary(b0, "Периметр `Будущее 2.0`") {
         Container(inner, "Внутренние сервисы", "Java", "Сервисы для обслуживания пациентов в клиниках")
         ContainerDb(inner_db, "База данных внутренних сервисов", "PostgreSQL", "Данные о пациентах, клиниках, операциях")
         Rel(inner, inner_db, "", "")
-        Rel(finance, kafka, "")
+        Rel(finance, camel, "")
         Rel(inner, kafka, "")
         Rel(user, kafka, "")
     }
@@ -40,15 +41,17 @@ System_Boundary(b0, "Периметр `Будущее 2.0`") {
     System_Boundary(storage, "Data Mesh") {
         ContainerQueue(etl, "Слой ETL/ELT", "Apache Airflow")
         Container(catalog, "Data Catalog", "Nessie", "Управляет метаданными")
+        Container(table, "Табличное хранилище", "Apache Iceberg", "")
         Container(s3, "Data Lake", "Minio", "S3-совместимое хранилище равок") #crimson
-        Rel(etl, s3, "Пишет данные", "")
-        Rel(etl, catalog, "Пишет метаданные", "")
-        Rel(kafka, etl, "Пишет данные", "")
+        Rel(etl, table, "Пишет метаданные", "")
+        Rel(table, catalog, "Пишет метаданные", "")
+        Rel(table, s3, "Пишет таблицы", "")
+        Rel(etl, kafka, "Забирает данные в DAG", "python")
         Rel(ai, kafka, "Слушает события")
         Rel(portal, kafka, "Слушает события")
         Rel(portal, catalog, "Читает бигдату")
-        Rel(ai, catalog, "Читает бигдату")
-        Rel(bi, catalog, "Читает бигдату")
+        Rel(ai, table, "Читает бигдату")
+        Rel(bi, table, "Читает бигдату")
     }
 
     Rel(api, inner, "", "REST")
@@ -56,6 +59,9 @@ System_Boundary(b0, "Периметр `Будущее 2.0`") {
     Rel(api, user, "", "REST")
 
     Rel(bi, legacy, "")
+    Rel(legacy, camel, "Интеграционные сообщения")
+    Rel(camel, kafka, "Пишет сообщения")
+    Rel(ai, camel, "")
 
     Rel(operator, api, "Работает во внутренней системе", "")
     Rel(fin_operator, api, "Работает в системе банка", "")
